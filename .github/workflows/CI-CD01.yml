@@ -35,7 +35,7 @@ jobs:
           context: ./src
           file: ./src/Dockerfile 
           push: true
-          tags: |
+          tags: |    
             glawber/rotten-potatoes:latest
             glawber/rotten-potatoes:${{github.run_number }}
             
