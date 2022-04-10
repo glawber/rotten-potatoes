@@ -39,7 +39,7 @@ jobs:
             glawber/rotten-potatoes:latest
             glawber/rotten-potatoes:${{github.run_number }}
             
-            CD:
+            CD01:
               needs: [CI-CD01]
               runs-on: ubuntu-latest
               steps:
