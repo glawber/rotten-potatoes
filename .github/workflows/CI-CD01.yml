@@ -40,10 +40,11 @@ jobs:
             glawber/rotten-potatoes:${{github.run_number }}
             
             CD:
-              needs: CI-CD01
+              needs: [CI-CD01]
               runs-on: ubuntu-latest
               steps:
                 - uses: actions/checkout@v3
+                
                 - name: Kubernetes Set Context
                   uses: Azure/k8s-set-context@v2
                   with:
