@@ -1,45 +1,60 @@
-name: CI-CD
+# This is a basic workflow to help you get started with Actions
+
+name: CI-CD01
+
+# Controls when the workflow will run
 on:
+  # Triggers the workflow on push or pull request events but only for the main branch
   push:
     branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  CI:
-    runs-on: ubuntu-latest 
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: actions/checkout@v2
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
 
-      - name: Docker Login
-        uses: docker/login-action@v1.9.0
+      - name: Docker login
+        uses: docker/login-action@v1.10.0
         with:
-          username: ${{secrets.DOCKERHUB_USER}}
-          password: ${{secrets.DOCKERHUB_PWD}}
-
-      - name: Build and push Docker images
-        uses: docker/build-push-action@v2.4.0
+            username: ${{ secrets.DOCKERHUB_USER}}
+            password: ${{ secrets.DOCKERHUB_PWD}}
+          
+      - name: Docker build and push 
+        uses: docker/build-push-action@v2.7.0
         with:
           context: ./src
-          file: ./src/Dockerfile
+          file: ./src/Dockerfile 
           push: true
-          tags: |
-            fabricioveronez/rotten-potatoes:latest
-            fabricioveronez/rotten-potatoes:${{github.run_number}}
+          tags: |    
+            glawber/rotten-potatoes:latest
+            glawber/rotten-potatoes:${{github.run_number }}
             
-  CD:
-    runs-on: ubuntu-latest
-    needs: [CI]
-    steps:
-      - uses: actions/checkout@v2
-  
-      - name: Kubernetes set context
-        uses: Azure/k8s-set-context@v1
-        with:
-          method: kubeconfig
-          kubeconfig: ${{secrets.K8S_CONFIG}}
-          
-      - name: Deploy Aplicação
-        uses: Azure/k8s-deploy@v1.3
-        with:
-          images: fabricioveronez/rotten-potatoes:${{github.run_number}}
-          manifests: |
-            k8s/deployment.yaml
+            CD:
+              needs: [CI-CD01]
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@v3
+                
+                - name: Kubernetes Set Context
+                  uses: Azure/k8s-set-context@v2
+                  with:
+                    method: kubeconfig
+                    kubeconfig: ${{K8S_CONFIG}}
+                - name: Deploy to Kubernetes cluster
+                  uses: Azure/k8s-deploy@v3.0
+                  with:
+                    images: glawber/rotten-potatoes:${{github.run_number }}
+                      manifests: |
+                        k8s/deployment.yaml
+            
+            
